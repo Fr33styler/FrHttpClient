@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.5](https://github.com/Fr33styler/FrHttpClient/compare/v0.0.4...v0.0.5) (2026-05-06)
+
+
+### Bug Fixes
+
+* Now there will be a response if the url is invalid ([809eb56](https://github.com/Fr33styler/FrHttpClient/commit/809eb56cd8bd0fbee8057801b9a26a33a495aacb))
+
 ## [0.0.4](https://github.com/Fr33styler/FrHttpClient/compare/v0.0.3...v0.0.4) (2026-05-06)
 
 
