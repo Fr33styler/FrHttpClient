@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.3](https://github.com/Fr33styler/FrHttpClient/compare/v0.0.2...v0.0.3) (2026-05-06)
+
+
+### Bug Fixes
+
+* Don't prettify if it contains the line breaker ([d0f8a39](https://github.com/Fr33styler/FrHttpClient/commit/d0f8a39c5cfac0e93f8cb205a6ddbabcc311e05f))
+
 ## [0.0.2](https://github.com/Fr33styler/FrHttpClient/compare/v0.0.1...v0.0.2) (2026-05-06)
 
 
