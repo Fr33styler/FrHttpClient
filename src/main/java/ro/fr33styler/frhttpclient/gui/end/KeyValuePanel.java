@@ -11,7 +11,7 @@ public class KeyValuePanel extends JPanel {
 
     private static final int PADDED_MINIMUM = 12;
 
-    private int padded = 12;
+    private int padded;
     private final JFrame frame;
     private final JPanel scrollablePanel;
 
@@ -34,8 +34,9 @@ public class KeyValuePanel extends JPanel {
         scrollablePane.getViewport().setPreferredSize(new Dimension(0, 220));
         add(scrollablePane);
 
-        for (int i = 0; i < padded; i++) {
+        for (int i = 0; i < PADDED_MINIMUM; i++) {
             scrollablePanel.add(new JPanel());
+            padded++;
         }
 
         JPanel addPanel = new JPanel();
@@ -117,7 +118,7 @@ public class KeyValuePanel extends JPanel {
         int componentCount = scrollablePanel.getComponentCount();
         scrollablePanel.add(panel, componentCount - padded);
 
-        if (padded > 0) {
+        if (padded > 1) {
             scrollablePanel.remove(componentCount - 1);
             padded--;
         }
