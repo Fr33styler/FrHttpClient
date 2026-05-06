@@ -4,7 +4,7 @@
 
     <groupId>ro.fr33styler.minecraft</groupId>
     <artifactId>FrHttpClient</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2-SNAPSHOT</version>
 
     <properties>
         <plugin.name>FrHttpClient</plugin.name>
