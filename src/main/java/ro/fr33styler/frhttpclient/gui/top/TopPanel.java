@@ -125,7 +125,8 @@ public class TopPanel extends JPanel {
 
     }
 
-    private String handlePrettyPrintIfXML(String text) {
+    private String tryPrettyPrint(String text) {
+        if (text.contains("\n")) return text;
         try {
             InputSource src = new InputSource(new StringReader(text));
             Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(src);
@@ -194,7 +195,7 @@ public class TopPanel extends JPanel {
                     JsonElement jsonElement = JsonParser.parseString(responseBody);
                     gui.getEndPanel().getResponseLogArea().setText(GsonUtil.GSON.toJson(jsonElement));
                 } catch (JsonParseException exception) {
-                    gui.getEndPanel().getResponseLogArea().setText(handlePrettyPrintIfXML(responseBody));
+                    gui.getEndPanel().getResponseLogArea().setText(tryPrettyPrint(responseBody));
                 }
             }
 
