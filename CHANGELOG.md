@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.4](https://github.com/Fr33styler/FrHttpClient/compare/v0.0.3...v0.0.4) (2026-05-06)
+
+
+### Bug Fixes
+
+* Using modern http client from java 11 to fix the missing PATCH http method. ([974ff64](https://github.com/Fr33styler/FrHttpClient/commit/974ff64de13ac943f92f13f895d7828627d34b5c))
+
 ## [0.0.3](https://github.com/Fr33styler/FrHttpClient/compare/v0.0.2...v0.0.3) (2026-05-06)
 
 
