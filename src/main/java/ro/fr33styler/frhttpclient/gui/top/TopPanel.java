@@ -118,61 +118,7 @@ public class TopPanel extends JPanel {
                 endpoint = endpoint.concat(joiner.toString());
             }
 
-            try {
-                HttpURLConnection connection = (HttpURLConnection) URI.create(endpoint).toURL().openConnection();
-                connection.setRequestMethod((String) httpMethods.getSelectedItem());
-
-                connection.setRequestProperty("User-Agent", "FrHttpClient/" + properties.getProperty("version", "1.0"));
-                for (Map.Entry<String, String> entry : gui.getEndPanel().getHeadersKeyValuePanel().getEntries().entrySet()) {
-                    String key = entry.getKey();
-                    String value = entry.getValue();
-                    if (key.trim().isEmpty() || value.trim().isEmpty()) continue;
-
-                    connection.setRequestProperty(entry.getKey(), entry.getValue());
-                }
-
-                String body = gui.getEndPanel().getBodyLogArea().getText();
-                if (!body.trim().isEmpty()) {
-                    connection.setDoOutput(true);
-                    try (OutputStream outputStream = connection.getOutputStream()) {
-                        outputStream.write(body.getBytes(StandardCharsets.UTF_8));
-                        outputStream.flush();
-                    }
-                }
-
-                int responseCode = connection.getResponseCode();
-
-                InputStream inputStream;
-                if (responseCode >= 200 && responseCode < 300) {
-                    inputStream = connection.getInputStream();
-                } else {
-                    inputStream = connection.getErrorStream();
-                }
-
-                gui.getEndPanel().getResponseStatusCodeField().setText(String.valueOf(responseCode));
-                if (inputStream == null) {
-                    gui.getEndPanel().getResponseLogArea().setText("");
-                } else {
-                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
-                    int length;
-                    byte[] buffer = new byte[4096];
-                    while ((length = inputStream.read(buffer)) != -1) {
-                        byteArrayOutputStream.write(buffer, 0, length);
-                    }
-                    String responseBody = new String(byteArrayOutputStream.toByteArray(), StandardCharsets.UTF_8);
-                    try {
-                        JsonElement jsonElement = JsonParser.parseString(responseBody);
-                        gui.getEndPanel().getResponseLogArea().setText(GsonUtil.GSON.toJson(jsonElement));
-                    } catch (JsonParseException exception) {
-                        gui.getEndPanel().getResponseLogArea().setText(handlePrettyPrintIfXML(responseBody));
-                    }
-                }
-
-                connection.disconnect();
-            } catch (Exception exception) {
-                gui.getEndPanel().getResponseLogArea().setText(exception.getMessage());
-            }
+            handleHttpConnection(gui, (String) httpMethods.getSelectedItem(), endpoint, properties);
 
             sendRequest.setEnabled(true);
         });
@@ -197,6 +143,64 @@ public class TopPanel extends JPanel {
             return out.toString();
         } catch (Exception exception) {
             return text;
+        }
+    }
+
+    private void handleHttpConnection(Gui gui, String httpMethod, String endpoint, Properties properties) {
+        try {
+            HttpURLConnection connection = (HttpURLConnection) URI.create(endpoint).toURL().openConnection();
+            connection.setRequestMethod(httpMethod);
+
+            connection.setRequestProperty("User-Agent", "FrHttpClient/" + properties.getProperty("version", "1.0"));
+            for (Map.Entry<String, String> entry : gui.getEndPanel().getHeadersKeyValuePanel().getEntries().entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
+                if (key.trim().isEmpty() || value.trim().isEmpty()) continue;
+
+                connection.setRequestProperty(entry.getKey(), entry.getValue());
+            }
+
+            String body = gui.getEndPanel().getBodyLogArea().getText();
+            if (!body.trim().isEmpty()) {
+                connection.setDoOutput(true);
+                try (OutputStream outputStream = connection.getOutputStream()) {
+                    outputStream.write(body.getBytes(StandardCharsets.UTF_8));
+                    outputStream.flush();
+                }
+            }
+
+            int responseCode = connection.getResponseCode();
+
+            InputStream inputStream;
+            if (responseCode >= 200 && responseCode < 300) {
+                inputStream = connection.getInputStream();
+            } else {
+                inputStream = connection.getErrorStream();
+            }
+
+            gui.getEndPanel().getResponseStatusCodeField().setText(String.valueOf(responseCode));
+            if (inputStream == null) {
+                gui.getEndPanel().getResponseLogArea().setText("");
+            } else {
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+                int length;
+                byte[] buffer = new byte[4096];
+                while ((length = inputStream.read(buffer)) != -1) {
+                    byteArrayOutputStream.write(buffer, 0, length);
+                }
+                String responseBody = new String(byteArrayOutputStream.toByteArray(), StandardCharsets.UTF_8);
+                try {
+                    JsonElement jsonElement = JsonParser.parseString(responseBody);
+                    gui.getEndPanel().getResponseLogArea().setText(GsonUtil.GSON.toJson(jsonElement));
+                } catch (JsonParseException exception) {
+                    gui.getEndPanel().getResponseLogArea().setText(handlePrettyPrintIfXML(responseBody));
+                }
+            }
+
+            connection.disconnect();
+        } catch (Exception exception) {
+            gui.getEndPanel().getResponseLogArea().setText(exception.getMessage());
         }
     }
 
