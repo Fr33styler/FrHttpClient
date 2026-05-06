@@ -108,7 +108,7 @@ public class TopPanel extends JPanel {
 
             StringJoiner joiner = new StringJoiner("&");
             gui.getEndPanel().getParamsKeyValuePanel().getEntries().forEach((key, value) -> {
-                if (key.trim().isEmpty() || value.trim().isEmpty()) return;
+                if (key.isBlank() || value.isBlank()) return;
 
                 joiner.add(key + "=" + value);
             });
@@ -150,26 +150,25 @@ public class TopPanel extends JPanel {
     }
 
     private void handleHttpConnection(Gui gui, String httpMethod, String endpoint, Properties properties) {
-        HttpClient httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build();
-
-        String body = gui.getEndPanel().getBodyLogArea().getText();
-        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder(URI.create(endpoint));
-        if (body.isBlank()) {
-            requestBuilder.method(httpMethod, HttpRequest.BodyPublishers.noBody());
-        } else {
-            requestBuilder.method(httpMethod, HttpRequest.BodyPublishers.ofString(body));
-        }
-
-        requestBuilder.header("User-Agent", "FrHttpClient/" + properties.getProperty("version", "1.0"));
-        for (Map.Entry<String, String> entry : gui.getEndPanel().getHeadersKeyValuePanel().getEntries().entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            if (key.isBlank() || value.isBlank()) continue;
-
-            requestBuilder.header(entry.getKey(), entry.getValue());
-        }
-
         try {
+            HttpClient httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build();
+
+            String body = gui.getEndPanel().getBodyLogArea().getText();
+            HttpRequest.Builder requestBuilder = HttpRequest.newBuilder(URI.create(endpoint));
+            if (body.isBlank()) {
+                requestBuilder.method(httpMethod, HttpRequest.BodyPublishers.noBody());
+            } else {
+                requestBuilder.method(httpMethod, HttpRequest.BodyPublishers.ofString(body));
+            }
+
+            requestBuilder.header("User-Agent", "FrHttpClient/" + properties.getProperty("version", "1.0"));
+            for (Map.Entry<String, String> entry : gui.getEndPanel().getHeadersKeyValuePanel().getEntries().entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
+                if (key.isBlank() || value.isBlank()) continue;
+
+                requestBuilder.header(entry.getKey(), entry.getValue());
+            }
             HttpResponse.BodyHandler<String> bodyHandler = HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8);
             HttpResponse<String> response = httpClient.send(requestBuilder.build(), bodyHandler);
 
@@ -180,7 +179,7 @@ public class TopPanel extends JPanel {
             } catch (JsonParseException exception) {
                 gui.getEndPanel().getResponseLogArea().setText(tryPrettyPrint(response.body()));
             }
-        } catch (IOException | InterruptedException exception) {
+        } catch (Exception exception) {
             gui.getEndPanel().getResponseLogArea().setText(exception.getMessage());
         }
     }

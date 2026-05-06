@@ -69,34 +69,23 @@ public class SnapshotsTypeAdapter extends TypeAdapter<Snapshots> {
         in.beginObject();
         while (in.hasNext()) {
             switch (in.nextName()) {
-                case "method": {
-                    snapshot.setMethod(in.nextString());
-                    break;
-                }
-                case "url": {
-                    snapshot.setUrl(in.nextString());
-                    break;
-                }
-                case "headers": {
+                case "method" -> snapshot.setMethod(in.nextString());
+                case "url" -> snapshot.setUrl(in.nextString());
+                case "headers" -> {
                     in.beginObject();
                     while (in.hasNext()) {
                         snapshot.getHeaders().put(in.nextName(), in.nextString());
                     }
                     in.endObject();
-                    break;
                 }
-                case "params": {
+                case "params" -> {
                     in.beginObject();
                     while (in.hasNext()) {
                         snapshot.getParameters().put(in.nextName(), in.nextString());
                     }
                     in.endObject();
-                    break;
                 }
-                case "body": {
-                    snapshot.setBody(in.nextString());
-                    break;
-                }
+                case "body" -> snapshot.setBody(in.nextString());
             }
         }
         in.endObject();
