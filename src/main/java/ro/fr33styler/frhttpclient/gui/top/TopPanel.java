@@ -18,8 +18,10 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
-import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Properties;
@@ -148,59 +150,37 @@ public class TopPanel extends JPanel {
     }
 
     private void handleHttpConnection(Gui gui, String httpMethod, String endpoint, Properties properties) {
+        HttpClient httpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build();
+
+        String body = gui.getEndPanel().getBodyLogArea().getText();
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder(URI.create(endpoint));
+        if (body.isBlank()) {
+            requestBuilder.method(httpMethod, HttpRequest.BodyPublishers.noBody());
+        } else {
+            requestBuilder.method(httpMethod, HttpRequest.BodyPublishers.ofString(body));
+        }
+
+        requestBuilder.header("User-Agent", "FrHttpClient/" + properties.getProperty("version", "1.0"));
+        for (Map.Entry<String, String> entry : gui.getEndPanel().getHeadersKeyValuePanel().getEntries().entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            if (key.isBlank() || value.isBlank()) continue;
+
+            requestBuilder.header(entry.getKey(), entry.getValue());
+        }
+
         try {
-            HttpURLConnection connection = (HttpURLConnection) URI.create(endpoint).toURL().openConnection();
-            connection.setRequestMethod(httpMethod);
+            HttpResponse.BodyHandler<String> bodyHandler = HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8);
+            HttpResponse<String> response = httpClient.send(requestBuilder.build(), bodyHandler);
 
-            connection.setRequestProperty("User-Agent", "FrHttpClient/" + properties.getProperty("version", "1.0"));
-            for (Map.Entry<String, String> entry : gui.getEndPanel().getHeadersKeyValuePanel().getEntries().entrySet()) {
-                String key = entry.getKey();
-                String value = entry.getValue();
-                if (key.trim().isEmpty() || value.trim().isEmpty()) continue;
-
-                connection.setRequestProperty(entry.getKey(), entry.getValue());
+            gui.getEndPanel().getResponseStatusCodeField().setText(String.valueOf(response.statusCode()));
+            try {
+                JsonElement jsonElement = JsonParser.parseString(response.body());
+                gui.getEndPanel().getResponseLogArea().setText(GsonUtil.GSON.toJson(jsonElement));
+            } catch (JsonParseException exception) {
+                gui.getEndPanel().getResponseLogArea().setText(tryPrettyPrint(response.body()));
             }
-
-            String body = gui.getEndPanel().getBodyLogArea().getText();
-            if (!body.trim().isEmpty()) {
-                connection.setDoOutput(true);
-                try (OutputStream outputStream = connection.getOutputStream()) {
-                    outputStream.write(body.getBytes(StandardCharsets.UTF_8));
-                    outputStream.flush();
-                }
-            }
-
-            int responseCode = connection.getResponseCode();
-
-            InputStream inputStream;
-            if (responseCode >= 200 && responseCode < 300) {
-                inputStream = connection.getInputStream();
-            } else {
-                inputStream = connection.getErrorStream();
-            }
-
-            gui.getEndPanel().getResponseStatusCodeField().setText(String.valueOf(responseCode));
-            if (inputStream == null) {
-                gui.getEndPanel().getResponseLogArea().setText("");
-            } else {
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
-                int length;
-                byte[] buffer = new byte[4096];
-                while ((length = inputStream.read(buffer)) != -1) {
-                    byteArrayOutputStream.write(buffer, 0, length);
-                }
-                String responseBody = new String(byteArrayOutputStream.toByteArray(), StandardCharsets.UTF_8);
-                try {
-                    JsonElement jsonElement = JsonParser.parseString(responseBody);
-                    gui.getEndPanel().getResponseLogArea().setText(GsonUtil.GSON.toJson(jsonElement));
-                } catch (JsonParseException exception) {
-                    gui.getEndPanel().getResponseLogArea().setText(tryPrettyPrint(responseBody));
-                }
-            }
-
-            connection.disconnect();
-        } catch (Exception exception) {
+        } catch (IOException | InterruptedException exception) {
             gui.getEndPanel().getResponseLogArea().setText(exception.getMessage());
         }
     }

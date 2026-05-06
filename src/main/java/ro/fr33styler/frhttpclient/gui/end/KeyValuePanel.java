@@ -85,16 +85,13 @@ public class KeyValuePanel extends JPanel {
     public void forEachKeyValueComponent(BiConsumer<JTextField, JTextField> consumer) {
         for (int i = 0; i < getKeyValueComponentCount(); i++) {
             Component component = scrollablePanel.getComponent(i);
-            if (!(component instanceof JPanel)) continue;
+            if (!(component instanceof JPanel panel)) continue;
 
-            JPanel panel = (JPanel) component;
             if (panel.getComponentCount() < 2) continue;
+            if (!(panel.getComponent(0) instanceof JTextField keyComponent)) continue;
+            if (!(panel.getComponent(1) instanceof JTextField valueComponent)) continue;
 
-            Component keyComponent = panel.getComponent(0);
-            Component valueComponent = panel.getComponent(1);
-            if (!(keyComponent instanceof JTextField) || !(valueComponent instanceof JTextField)) continue;
-
-            consumer.accept((JTextField) keyComponent, (JTextField) valueComponent);
+            consumer.accept(keyComponent, valueComponent);
         }
     }
 
