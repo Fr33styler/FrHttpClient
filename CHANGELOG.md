@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.6](https://github.com/Fr33styler/FrHttpClient/compare/v0.0.5...v0.0.6) (2026-10-12)
+
+
+### Bug Fixes
+
+* Small change to undergo the release me bot to release ([490f8d3](https://github.com/Fr33styler/FrHttpClient/commit/490f8d35ca90620aa769a541062282759036e0ff))
+
 ## [0.0.5](https://github.com/Fr33styler/FrHttpClient/compare/v0.0.4...v0.0.5) (2026-05-06)
 
 
