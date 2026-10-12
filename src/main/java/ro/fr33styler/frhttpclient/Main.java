@@ -39,6 +39,7 @@ public class Main {
         frame.setLocationRelativeTo(gui.getCenterPanel());
         frame.setLocationByPlatform(true);
         frame.setVisible(true);
+
     }
 
 }
