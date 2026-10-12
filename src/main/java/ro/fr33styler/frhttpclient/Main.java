@@ -36,6 +36,8 @@ public class Main {
         frame.add(gui.getEndPanel(), BorderLayout.PAGE_END);
 
         frame.pack();
+        frame.setLocationRelativeTo(gui.getCenterPanel());
+        frame.setLocationByPlatform(true);
         frame.setVisible(true);
     }
 
